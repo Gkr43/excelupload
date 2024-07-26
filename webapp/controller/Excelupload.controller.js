@@ -4,21 +4,69 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/m/upload/Uploader",
 	"sap/m/StandardListItem",
-	"sap/m/MessageToast"
+	"sap/m/MessageToast", 
+    "sap/ui/model/Filter"
 ],
-function (Controller,Item,JSONModel,Uploader,ListItem,MessageToast) {
+function (Controller,Item,JSONModel,Uploader,ListItem,MessageToast,Filter) {
     "use strict";
 
     return Controller.extend("excelupload.controller.Excelupload", {
         onInit: function () {
             this.oModel = this.getOwnerComponent().getModel();
+            this.oModel.setUseBatch(true);
             this.localModel = new sap.ui.model.json.JSONModel();
         this.getView().setModel(this.localModel, "localModel");
        
     },
+    readExistingEntry:function(oFilter,index,oPayload){
+        var that=this;
+        that.oModel.read("/ZCPR_UPLOAD", {
+            urlParameters: {
+                "$top": "1000"
+            },
+            async:false,
+            filters:oFilter,
+            success: function(response) {
+                //that.localModel.setData(response.results);
+                if(response.results.length>0){
+                    that.excelData
+                var items = that.getView().getModel("localModel").getData().items;
+                var indices = that.byId("ExcellUploadTable").getSelectedIndices();
+                items[indices[index]]['POAM ID']=response.results[response.results.length-1].AmdID;
+                that.getView().getModel("localModel").refresh(true);
+                
+                }else{
+                    
+                   // that.createEntryArr.push(that.oModel._createBatchRequest("ZCPR_UPLOAD","POST",oPayload));
+                    that.createEntry(oPayload,that);
+                }
+                
+
+                //this.getView().setModel(this.localModel, "localModel");
+              },
+              error: function(error) {
+                
+              }
+          });
+    },
+    createEntry:function(ExcellpayLoad,that){
+        that.oModel.create("/ZCPR_UPLOAD", ExcellpayLoad, {
+            async:false,
+            success: function(response) {
+                that.redAMDID();
+                sap.m.MessageToast.show("Excell File Data Saved Successfully.");
+              },
+              error: function(error) {
+                sap.m.MessageToast.show("Failed to save Excell Fil Data.");
+              }
+          });
+    },
     redAMDID:function(){
         var that=this;
         that.oModel.read("/ZCPR_UPLOAD", {
+            urlParameters: {
+                "$top": "1000"
+            },
             success: function(response) {
                 //that.localModel.setData(response.results);
                 that.excelData
@@ -186,15 +234,18 @@ function (Controller,Item,JSONModel,Uploader,ListItem,MessageToast) {
 
    var indices = this.byId("ExcellUploadTable").getSelectedIndices();
 
-
-    
+if(indices.length===0){
+    sap.m.MessageToast.show('Select atleast one line item');
+    return;
+}
+    this.createEntryArr=[];
     for (var i = 0; i < indices.length; i++) {
        // var obj = items[i];
        var obj = items[indices[i]];
       var oldfr =  this.onDateConvert(obj['Old From']);
       var newfr =  this.onDateConvert(obj['New From']);
       obj['New From']
-      var amdId=this.nextAMDID.toString();
+      var amdId=this.nextAMDID.toString()+i;
       amdId=amdId.padStart(10,0);
      // var Enddate =  this.onDateConvert( obj['End Date']); 
       //var engdt =  this.onDateConvert(obj['Change Date']);
@@ -250,17 +301,33 @@ function (Controller,Item,JSONModel,Uploader,ListItem,MessageToast) {
        var that =this;
        // ZCPR_UPLOAD
        //zcpr_upload_sb_01
+      
+       
+            var aFilters=[];
+            aFilters.push(new Filter("Bstnk","EQ", ExcellpayLoad.Bstnk));
+            aFilters.push(new Filter("Posex","EQ", ExcellpayLoad.Posex));
+            aFilters.push(new Filter("Newfr","EQ", ExcellpayLoad.Newfr));
+            aFilters.push(new Filter("Amdno","EQ", ExcellpayLoad.Amdno));
+        
 
-      this.oModel.create("/ZCPR_UPLOAD", ExcellpayLoad, {
-            success: function(response) {
-                that.redAMDID();
-                sap.m.MessageToast.show("Excell File Data Saved Successfully.");
-              },
-              error: function(error) {
-                sap.m.MessageToast.show("Failed to save Excell Fil Data.");
-              }
-          });
+            this.readExistingEntry(aFilters,i,ExcellpayLoad);
+        
+         
+    
+      
         }
+        
+      
+        this.oModel.submitChanges({
+            success: function(data, response) {
+                //To do
+            },
+            error: function(e) {
+                //To do
+            }
+        });
+
+
         }
 
    
