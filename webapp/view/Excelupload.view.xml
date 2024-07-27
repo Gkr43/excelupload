@@ -46,13 +46,13 @@
 						<!-- <Table items="{localModel>/items}"  id="ExcellUploadTable"  mode="SingleSelectLeft"
 						 selectionChange="onSelection" > -->
 
-	<ui:Table  id="ExcellUploadTable" rowSelectionChange="onSelectRow" rows="{localModel>/items}"  visibleRowCount="8" rowsUpdated="onUpdateRows" >
+	<ui:Table  id="ExcellUploadTable" rowSelectionChange="onSelectRow" rows="{localModel>/items}"   visibleRowCount="8" rowsUpdated="onUpdateRows" >
 						<ui:extension>
 							<OverflowToolbar>
                              <Title text="{i18n>title}" />
 								<ToolbarSpacer/>
                                 
-							 <Button id="UpDateButton" text="Update Price" press="onUpdatePriceButton"/> 
+							 <Button id="UpDateButton" text="Save Documents" press="onUpdatePriceButton"/> 
 						</OverflowToolbar>
 						</ui:extension>
 						<ui:columns>
