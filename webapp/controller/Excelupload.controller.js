@@ -36,16 +36,20 @@ function (Controller,Item,JSONModel,Uploader,ListItem,MessageToast,Filter,DateFo
                     //that.excelData
                 var items = that.getView().getModel("localModel").getData().items;
                 var indices = that.byId("ExcellUploadTable").getSelectedIndices();
+                var oDateFormat = DateFormat.getDateInstance({
+                    pattern: "dd.MM.yyyy" ///ddmmyyyy
+                });
+               // var dateval= new Date(date);
+               
                 //items[indices[index]]['POAM ID']=response.results[response.results.length-1].AmdID;
                 for(var i=0;i<response.results.length;i++){
                     for(var j=0;j<items.length;j++){
-                        if(response.results[i].Bstnk ===  items[j]['PO Number'] && response.results[i].Posex=== items[j]['PO item'] && response.results[i].Amdno=== items[j]['POAM No'] ){ 
+                        var newfr = oDateFormat.format(response.results[i].Newfr);
+                        if(response.results[i].Bstnk ===  items[j]['PO Number'] && response.results[i].Posex=== items[j]['PO item'] && newfr=== items[j]['New From'] ){ 
                            
                           //  items[indices[j]]['POAM ID']  =  response.results[i].AmdID; 
                           var obj=response.results[response.results.length-1];
-                          var oDateFormat = DateFormat.getDateInstance({
-                            pattern: "dd.MM.yyyy" ///ddmmyyyy
-                        });
+                        
                        // var dateval= new Date(date);
                        var newfr = oDateFormat.format(obj.Newfr);
                           var filItem=items.filter(function(e){if(e['POAM No']===obj.Amdno && e['New From']=== newfr &&  e['PO Number']===obj.Bstnk && e['PO item']===obj.Posex){ return e;}})   
@@ -104,9 +108,13 @@ function (Controller,Item,JSONModel,Uploader,ListItem,MessageToast,Filter,DateFo
                 that.excelData;
                 var items = that.getView().getModel("localModel").getData().items;
                 var indices = that.byId("ExcellUploadTable").getSelectedIndices();
+                var oDateFormat = DateFormat.getDateInstance({
+                    pattern: "dd.MM.yyyy" ///ddmmyyyy
+                });
                 for(var i=0;i<response.results.length;i++){
                     for(var j=0;j<indices.length;j++){
-                        if(response.results[i].Bstnk ===  items[indices[j]]['PO Number'] && response.results[i].Posex=== items[indices[j]]['PO item'] && response.results[i].Amdno=== items[indices[j]]['POAM No'] ){ 
+                        var newFr = oDateFormat.format(response.results[i].Newfr);
+                        if(response.results[i].Bstnk ===  items[indices[j]]['PO Number'] && response.results[i].Posex=== items[indices[j]]['PO item'] && response.results[i].Amdno=== items[indices[j]]['POAM No'] && newFr === items[indices[j]]['New From'] ){ 
                            
                             items[indices[j]]['POAM ID']  =  response.results[i].AmdID;    
                         }
